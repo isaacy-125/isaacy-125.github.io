@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html {
+      width: 100%;
+      height: 100%;
+    }
+    p {
+      margin: 0;
+    }
+    body {
+      width: 100%;
+      height: 100%;
+      background-color: rgb(45, 80, 226);
+      margin: 0;
+      padding-top: 20px;
+    }
+    .cs {
+      color: white;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .wrap {
+      background-color: white;
+      /* width: 100%; */
+      padding: 20px;
+      margin: 0 20px;
+      border-radius: 10px;
+    }
+    .tf {
+      font-size: 25px;
+    }
+    .qt {
+      color: #fe9000;
+    }
+    .xian {
+      width: 100%;
+      border-bottom: 1px dashed black;
+      margin-top: 10px;
+      opacity: 0.3;
+    }
+    .important {
+      color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .important-block {
+            background-color: #1ab07e;
+            padding: 10px;
+            border-radius: 5px;
+            width: 43%;
+            font-size: 14px;
+            height: 74px;
+        }
+
+        .important-block-button {
+            margin-top: 5px;
+            background-color: white;
+            color: #1ab07e;
+            text-align: center;
+            padding: 2px 0px;
+            border-radius: 20px;
+        }
+        .lvma {
+          color: #1ab07e;
+          text-align: center;
+          font-size: 25px;
+        }
+  </style>
+</head>
+<body>
+  <p class="cs">场所登记信息</p>
+  <div class="wrap">
+      <p class="tf">天府软件园E区</p>
+      <p class="qt">其他</p>
+      <p style="opacity: 0.7;">四川省/成都市/武侯区</p>
+      <p style="opacity: 0.3;">天府大道中段1306天府软件园E3-1</p>
+  </div>
+  <div class="wrap" style="margin-top: 15px;">
+    <p class="tf">郑*天</p>
+    <p style="opacity: 0.3;">身份证号：51**************11</p>
+    <div class="xian"></div>
+    <p class="date tf" style="font-size: 20px; text-align: center;margin-top: 25px;"></p>
+    <p class="lvma">绿码</p>
+    <p class="lvma">健康状态为低风险</p>
+
+    <div class="important">
+      <div class="important-block">
+          <p>
+              省内24小时核酸：阴性
+          </p>
+          <p class="important-block-date">
+              
+          </p>
+          <div class="important-block-button">
+              点击更新
+          </div>
+      </div>
+      <div class="important-block">
+          <p>风险城市旅局史</p>
+          <p class="important-block-date"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+
+  <script>
+    document.querySelector('.date').innerHTML = `
+      ${moment().format('YYYY-MM-DD HH:mm:ss')}
+    `;
+
+    document.querySelectorAll('.important-block-date')[0].innerHTML = `
+                ${moment().format('MM/DD')} 3时
+            `
+
+            document.querySelectorAll('.important-block-date')[1].innerHTML = `
+                ${moment().format('MM/DD')} 3时
+            `
+  </script>
+</body>
+</html>

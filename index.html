@@ -1,12 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: rgb(45, 80, 226);
+        }
+
+        p {
+            margin: 0;
+            color: white;
+        }
+
+        .scroll__outer {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+            color: #000;
+            width: 100%;
+            height: 36px;
+        }
+
+        .scroll__inner {
+            position: absolute;
+            left: 0;
+            top: 7px;
+            transform: translate3d(0, 0, 0);
+            display: flex;
+            flex-direction: row;
+        }
+
+        .scroll__text {
+            padding-right: 20px;
+            white-space: nowrap;
+        }
+
+        .cicle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgb(45, 80, 226);
+            position: absolute;
+            width: 20px;
+            top: 15%;
+        }
+        .squraContainer .squra:nth-child(odd) {
+            background-color: rgb(45, 80, 226);
+        }
+        .squraContainer .squra:nth-child(even) {
+            background-color: rgb(85, 90, 109);
+        }
+        .squra {
+            flex-shrink: 0;
+            width: 13px;
+            background: blue;
+            height: 10px;
+            transform: skew(-30deg);
+            margin-right: 5px;
+        }
+
+        .demo2 {
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .list2 li {
+            transform: skew(-30deg);
+            float: left;
+            width: 13px;
+            height: 7px;
+            margin-right: 5px;
+            text-align: center;
+            font-size: 20px;
+            color: #fff;
+            line-height:100px;
+        }
+        .list2 li:nth-child(odd){
+            background-color: #85a4ff;
+        }
+        .list2 li:nth-child(even){
+            background-color: #adc6ff;
+        }
+
+        .important {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .important-block {
+            background-color: #1ab07e;
+            padding: 10px;
+            border-radius: 5px;
+            width: 43%;
+            font-size: 14px;
+            height: 74px;
+        }
+
+        .important-block-button {
+            margin-top: 5px;
+            background-color: white;
+            color: #1ab07e;
+            text-align: center;
+            padding: 2px 0px;
+            border-radius: 20px;
+        }
+
+    </style>
 </head>
+
 <body>
-  234234234
+    <div style="
+            background-image: url('./resources/top.jpeg');
+            height: 25%;
+            background-size: cover;
+            padding-top: 20px;
+            padding-left: 20px;
+            padding-right: 20px;
+            text-align: center;
+            position: relative;
+        ">
+        <p>四川天府健康通</p>
+        <div style="
+                width: calc(100% - 40px);
+                height: 40px;
+                background-color: white;
+                border-radius: 5px;
+                bottom: 10px;
+                position: absolute;
+                display: flex;
+                align-items: center;
+            " ;>
+            <img style="margin-left: 10px;width: 30px;" src="./resources/tou.jpg" alt="">
+            <div id="scroll-outer" class="scroll__outer">
+                <div id="scroll-inner" class="scroll__inner">
+                    <div class="scroll__text">四川疾控将康提示（2022年11月22日20时） 【点击查看详情】</div>
+                    <div class="scroll__text" id="last-text">四川疾控将康提示（2022年11月22日20时） 【点击查看详情】</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="
+            width: calc(100% - 80px);
+            background-color: white;
+            margin: auto;
+            margin-top: 2px;
+            border-radius: 10px;
+            position: relative;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px;
+        ">
+        <div class="cicle" style="left: -10px;"></div>
+        <div class="cicle" style="right: -10px;"></div>
+        <div style="
+            padding-top: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px dashed black;
+            padding-bottom: 25px;
+            ">
+            <div style="color: black;">
+                <p style="
+                        color: black;
+                        font-size: 20px;
+                        font-weight: bold;
+                    ">郑*天</p>
+                <p style="color: black;opacity: 0.8;">
+                    51**************11
+                </p>
+            </div>
+        </div>
+        <div class="currentTime" style="text-align: center;">
+            <p class="currentTimeP" style="
+                color: rgb(45, 80, 226);
+                font-weight: bold;
+                margin-top: 25px;
+                font-size: 20px;
+                "></p>
+        </div>
+        <img src="./resources/ma.png" style="
+        width: 60%;
+        margin: auto;
+        display: block;
+        margin-top: 20px;
+        "></img>
+        <p style="margin: auto;color: rgb(109, 168, 110);
+        margin-top: 10px;
+        display: table;">绿码：健康状态为低分险</p>
+        <div style="
+        background-color: rgb(63, 87, 221);
+        width: 65%;
+        border-radius: 20px;
+        margin: auto;
+        margin-top: 10px;
+        padding: 10px 0;
+        ">
+            <div style="display: flex;align-items: center;justify-content: space-between;padding: 0 20px;">
+                <img 
+                    style="width: 20px;" 
+                    src="./resources/icon.png"
+                    alt="">
+                <p id="sao" style="font-size: 15px;">扫场所码</p>
+                <p>&gt;</p>
+            </div>
+        </div>
+        <div class="demo2">
+            <ul class="list2 clearfix" id="demo2">
+                 <li>1</li>
+                 <li>2</li>
+                 <li>3</li>
+                 <li>4</li>
+                 <li>5</li>
+                 <li>6</li>
+                 <li>1</li>
+                 <li>2</li>
+                 <li>3</li>
+                 <li>4</li>
+                 <li>5</li>
+                 <li>6</li>
+                 <li>1</li>
+                 <li>2</li>
+                 <li>3</li>
+                 <li>4</li>
+                 <li>5</li>
+                 <li>6</li>
+            </ul>
+      </div>
+      <div class="important">
+        <div class="important-block">
+            <p>
+                省内24小时核酸：阴性
+            </p>
+            <p class="important-block-date">
+                
+            </p>
+            <div class="important-block-button">
+                点击更新
+            </div>
+        </div>
+        <div class="important-block">
+            <p>风险城市旅局史</p>
+            <p class="important-block-date"></p>
+        </div>
+      </div>
+    </div>
+    <video src=""></video>
+    <!-- <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+    <script src="./resources/scroll.js"></script>
+    <script>
+        window.onload = function() {
+            const outer = document.getElementById('scroll-outer')
+            const innter = document.getElementById('scroll-inner')
+            const outerWidth = outer.getBoundingClientRect().width
+            const innerWidth = innter.getBoundingClientRect().width
+            const lastText = document.getElementById('last-text')
+            const padding = 20
+            const middle = innerWidth / 2
+            let translate = 0
+            if (middle - padding > outerWidth) {
+                setInterval(() => {
+                    translate = translate >= middle ? 1 : (translate + 1)
+                    innter.style.transform = `translate3d(${-translate}px, 0, 0)`
+                }, 10)
+            } else {
+                lastText.style.display = 'none'
+            }
+
+            setInterval(() => {
+                const currentTime = moment().format('HH:mm:ss YYYY-MM-DD')
+                document.querySelector('.currentTimeP').innerHTML = `
+                    <span>${moment().format('HH')}</span><span>:</span><span>${moment().format('mm')}</span><span>:</span><span style="font-size: 25px;">${moment().format('ss')}</span><span style="margin: 0 10px;"></span><span>${moment().format('YYYY')}</span><span>-</span><span>${moment().format('MM')}</span><span>-</span><span>${moment().format('DD')}</span>
+                `
+            }, 1000)
+
+            seamscroll.init({
+                dom: document.getElementById('demo2'),
+                direction: 2
+            })
+
+            document.querySelectorAll('.important-block-date')[0].innerHTML = `
+                ${moment().format('MM/DD')} 3时
+            `
+
+            document.querySelectorAll('.important-block-date')[1].innerHTML = `
+                ${moment().format('MM/DD')} 3时
+            `
+
+            document.querySelector('#sao').onclick = function() {
+                window.location.href = './second.html';
+                // const video = document.querySelector('video');
+                // navigator.getUserMedia({
+                //         auido: false,
+                //         video: {
+                //             facingMode: {
+                //                 exact: 'environment',
+                //             }
+                //         }
+                //     },
+                //     function (steam) {
+                //         video.srcObject = steam;
+                //         video.onloadedmetadata = function (e) {
+                //             video.play();
+                //         };
+                //     },
+                //     function (err) {
+                //         console.log(err)
+                //     }
+                // )
+            }
+        }
+    </script>
 </body>
+
 </html>
