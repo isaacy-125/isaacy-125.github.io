@@ -1173,9 +1173,41 @@
             renderBoard();
         };
 
-        // 添加窗口大小改变事件监听
+        // 修改窗口大小改变事件监听
         window.addEventListener("resize", () => {
-            resetGame();
+            // 保存当前游戏状态
+            const currentState = {
+                board: JSON.parse(JSON.stringify(MineSweeper.data.board)),
+                revealed: JSON.parse(JSON.stringify(MineSweeper.data.revealed)),
+                flagged: JSON.parse(JSON.stringify(MineSweeper.data.flagged)),
+                mineCount: MineSweeper.data.mineCount,
+                gameOver: MineSweeper.data.gameOver,
+                isFirstClick: MineSweeper.data.isFirstClick
+            };
+
+            // 获取当前视口尺寸
+            const oldWidth = window.innerWidth;
+            const oldHeight = window.innerHeight;
+
+            // 使用 setTimeout 延迟检查，避免移动端滚动触发
+            setTimeout(() => {
+                // 如果视口尺寸真的改变了（不是因为滚动导致的）
+                if (oldWidth !== window.innerWidth || oldHeight !== window.innerHeight) {
+                    // 重新计算格子大小
+                    MineSweeper.calculateCellSize();
+                    updateStyles();
+                    
+                    // 恢复游戏状态
+                    MineSweeper.data.board = currentState.board;
+                    MineSweeper.data.revealed = currentState.revealed;
+                    MineSweeper.data.flagged = currentState.flagged;
+                    MineSweeper.data.mineCount = currentState.mineCount;
+                    MineSweeper.data.gameOver = currentState.gameOver;
+                    MineSweeper.data.isFirstClick = currentState.isFirstClick;
+                    
+                    renderBoard();
+                }
+            }, 300); // 300ms 延迟，避免频繁触发
         });
 
         // 添加难度选择的事件处理
