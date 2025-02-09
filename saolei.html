@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>扫雷游戏</title>
     <style>
+        html,
         body {
             margin: 0;
+            padding: 0;
+            min-height: 100%;
+            width: 100%;
+            background: linear-gradient(135deg,
+                    #a8e6cf 0%,
+                    #dcedc1 50%,
+                    #ffd3b6 100%);
+        }
+
+        body {
             padding: 10px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 50%, #ffd3b6 100%);
             box-sizing: border-box;
-            overflow: auto;  /* 允许滚动以确保内容完整显示 */
+            overflow-y: scroll;
+            /* 始终显示滚动条，防止抖动 */
+            -webkit-overflow-scrolling: touch;
+            /* iOS 滚动优化 */
         }
 
         .game-container {
@@ -22,13 +32,13 @@
             align-items: center;
             width: 100%;
             max-width: 100%;
-            min-height: 100vh;
             padding: 20px;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             backdrop-filter: blur(5px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
+            margin-bottom: 20px;
         }
 
         .board {
@@ -38,7 +48,9 @@
             border: 3px solid #7b7b7b;
             border-radius: 4px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            margin: 0 auto;  /* 水平居中 */
+            margin: 10px auto;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .row {
@@ -61,9 +73,9 @@
             position: relative;
             box-sizing: border-box;
         }
-        
+
         .cell::before {
-            content: '';
+            content: "";
             position: absolute;
             top: 0;
             left: 0;
@@ -75,63 +87,96 @@
             border-bottom: 2px solid #7b7b7b;
             box-sizing: border-box;
         }
-        
+
         .cell:active:not(.revealed):not(.flagged)::before {
             border: 1px solid #7b7b7b;
         }
-        
+
         .revealed {
             background: #e6e6e6;
         }
-        
+
         /* 修改已显示格子的边框样式 */
         .revealed::before {
-            display: block;  /* 显示边框 */
-            border: 1px solid #bdbdbd;  /* 使用柔和的边框颜色 */
+            display: block;
+            /* 显示边框 */
+            border: 1px solid #bdbdbd;
+            /* 使用柔和的边框颜色 */
         }
-        
+
         .mine {
             background: #ff4444;
         }
-        
+
         .mine::before {
-            border-color: #ff0000;  /* 地雷格子使用红色边框 */
+            border-color: #ff0000;
+            /* 地雷格子使用红色边框 */
         }
-        
+
         .flagged::before {
             border-top: 2px solid #fff;
             border-left: 2px solid #fff;
             border-right: 2px solid #7b7b7b;
             border-bottom: 2px solid #7b7b7b;
         }
+
         /* 添加数字颜色 */
-        .revealed[data-number="1"] { color: #0000ff; }
-        .revealed[data-number="2"] { color: #007b00; }
-        .revealed[data-number="3"] { color: #ff0000; }
-        .revealed[data-number="4"] { color: #00007b; }
-        .revealed[data-number="5"] { color: #7b0000; }
-        .revealed[data-number="6"] { color: #007b7b; }
-        .revealed[data-number="7"] { color: #000000; }
-        .revealed[data-number="8"] { color: #7b7b7b; }
-        
+        .revealed[data-number="1"] {
+            color: #0000ff;
+        }
+
+        .revealed[data-number="2"] {
+            color: #007b00;
+        }
+
+        .revealed[data-number="3"] {
+            color: #ff0000;
+        }
+
+        .revealed[data-number="4"] {
+            color: #00007b;
+        }
+
+        .revealed[data-number="5"] {
+            color: #7b0000;
+        }
+
+        .revealed[data-number="6"] {
+            color: #007b7b;
+        }
+
+        .revealed[data-number="7"] {
+            color: #000000;
+        }
+
+        .revealed[data-number="8"] {
+            color: #7b7b7b;
+        }
+
         /* 添加控制面板样式 */
         .controls {
             width: 100%;
             max-width: 600px;
-            margin-bottom: 10px;  /* 减小边距 */
-            padding: 5px 10px;    /* 减小内边距 */
+            margin-bottom: 10px;
+            /* 减小边距 */
+            padding: 5px 10px;
+            /* 减小内边距 */
         }
+
         .mine-counter {
-            background: #000;
-            color: #ff0000;
-            padding: 5px 15px;
-            font-family: 'Digital', monospace;
-            font-size: 20px;      /* 固定大小 */
-            border: 2px solid #7b7b7b;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #eee;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
         }
+
         .reset-button {
             padding: 8px 24px;
-            font-size: 16px;      /* 固定大小 */
+            font-size: 16px;
+            /* 固定大小 */
             background: #e0e0e0;
             border: none;
             border-radius: 4px;
@@ -141,11 +186,12 @@
             border-right: 2px solid #7b7b7b;
             border-bottom: 2px solid #7b7b7b;
         }
+
         .reset-button:active {
             background: #c0c0c0;
             border: 2px solid #7b7b7b;
         }
-        
+
         /* 添加难度选择器样式 */
         .difficulty-selector {
             margin-bottom: 10px;
@@ -153,7 +199,7 @@
             gap: 10px;
             align-items: center;
         }
-        
+
         .difficulty-btn {
             padding: 5px 15px;
             font-size: 14px;
@@ -166,31 +212,31 @@
             border-right: 2px solid #7b7b7b;
             border-bottom: 2px solid #7b7b7b;
         }
-        
+
         .difficulty-btn.active {
             background: #b0b0b0;
             border: 2px solid #7b7b7b;
         }
-        
+
         .custom-mines {
             display: flex;
             align-items: center;
             gap: 5px;
         }
-        
+
         .custom-mines input {
             width: 60px;
             padding: 4px;
             border: 2px solid #7b7b7b;
             border-radius: 4px;
         }
-        
+
         .controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .peek-button {
             padding: 8px 24px;
             font-size: 16px;
@@ -203,26 +249,76 @@
             border-right: 2px solid #7b7b7b;
             border-bottom: 2px solid #7b7b7b;
         }
-        
+
         .peek-button.active {
             background: #b0b0b0;
             border: 2px solid #7b7b7b;
         }
-        
+
         /* 添加预览状态的格子样式 */
         .cell.peeking {
             opacity: 0.7;
         }
-        
+
         /* 添加按下状态的样式 */
         .cell.pressing::before {
             border: 2px solid #7b7b7b !important;
             background: #a0a0a0;
         }
-        
+
         .cell.pressing-neighbor::before {
             border: 2px solid #7b7b7b !important;
             background: #a0a0a0;
+        }
+
+        /* 添加侧边按钮和弹出框样式 */
+        .mobile-settings-btn {
+            display: none;
+            position: fixed;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            cursor: move;
+            touch-action: none;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .settings-content {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 80%;
+            max-width: 300px;
+            background: white;
+            padding: 20px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+        }
+
+        .close-settings {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
         }
 
         /* 修改移动端样式 */
@@ -230,88 +326,105 @@
             body {
                 padding: 5px;
             }
-            
+
             .game-container {
-                min-height: auto;
-                padding: 10px;
+                padding: 10px 5px;
+                margin-bottom: 10px;
+            }
+
+            .controls {
+                position: sticky;
+                top: 0;
+                background: rgba(255, 255, 255, 0.9);
+                z-index: 10;
+                padding: 5px;
                 width: 100%;
                 box-sizing: border-box;
+                margin-bottom: 10px;
             }
-            
+
             .board {
-                margin: 10px auto;
-                padding: 2px;
-                border: 2px solid #7b7b7b;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                margin: 5px auto;
+                padding: 3px;
+                border-width: 2px;
             }
-            
-            .difficulty-selector {
-                flex-direction: column;
-                align-items: stretch;
-                margin-bottom: 8px;
-                gap: 5px;
+
+            .mobile-settings-btn {
+                position: fixed;
+                z-index: 1000;
             }
-            
-            .difficulty-btn {
-                padding: 8px;
-                font-size: 13px;
-                height: 35px;
+
+            /* 设置模态框样式 */
+            .settings-modal {
+                position: fixed;
+                z-index: 2000;
             }
-            
-            .custom-mines {
-                display: flex;
-                gap: 5px;
-                justify-content: center;
-                height: 35px;
+
+            .settings-content {
+                position: fixed;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
-            
-            .custom-mines input {
-                width: 60px;
-                padding: 4px;
-                font-size: 13px;
-            }
-            
-            .controls {
-                flex-wrap: wrap;
-                gap: 8px;
-                justify-content: center;
-                margin: 5px 0;
-                height: 40px;
-            }
-            
-            .mine-counter {
-                padding: 4px 10px;
-                font-size: 15px;
-                height: 30px;
-                display: flex;
-                align-items: center;
-            }
-            
-            .reset-button, .peek-button {
-                padding: 6px 12px;
-                font-size: 13px;
-                height: 30px;
-            }
+        }
+
+        /* 修改滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
+
 <body>
     <div class="game-container">
+        <button class="mobile-settings-btn">⚙️</button>
         <div class="difficulty-selector">
-            <button class="difficulty-btn active" data-difficulty="easy">简单 (12×12, 20雷)</button>
-            <button class="difficulty-btn" data-difficulty="medium">中等 (16×16, 40雷)</button>
-            <button class="difficulty-btn" data-difficulty="hard">困难 (22×22, 99雷)</button>
+            <button class="difficulty-btn active" data-difficulty="easy">
+                简单 (12×12, 20雷)
+            </button>
+            <button class="difficulty-btn" data-difficulty="medium">
+                中等 (16×16, 40雷)
+            </button>
+            <button class="difficulty-btn" data-difficulty="hard">
+                困难 (22×22, 99雷)
+            </button>
             <div class="custom-mines">
-                <input type="number" id="customMines" min="10" max="80" value="40">
-                <button class="difficulty-btn" data-difficulty="custom">自定义</button>
+                <input type="number" id="customMines" min="10" max="80" value="40" />
+                <button class="difficulty-btn" data-difficulty="custom">
+                    自定义
+                </button>
             </div>
         </div>
         <div class="controls">
-            <div class="mine-counter">💣 <span id="mineCount">20</span></div>
+            <div class="mine-counter">剩余地雷: <span id="remaining-mines">0</span></div>
             <button class="reset-button" onclick="resetGame()">重新开始</button>
             <button class="peek-button" onclick="togglePeek()">查看地雷</button>
         </div>
         <div id="board" class="board"></div>
+    </div>
+
+    <div class="settings-modal">
+        <div class="settings-content">
+            <span class="close-settings">&times;</span>
+            <h3>游戏设置</h3>
+            <div class="difficulty-selector">
+                <!-- 将原有的难度选择器内容移动到这里 -->
+            </div>
+        </div>
     </div>
 
     <script>
@@ -322,15 +435,15 @@
                 cols: 16,
                 mines: 40,
                 cellSize: 0,
-                // 修改难度配置，添加棋盘大小
                 difficulties: {
-                    easy: { mines: 20, name: '简单', size: 12 },     // 12x12 的棋盘
-                    medium: { mines: 40, name: '中等', size: 16 },   // 16x16 的棋盘
-                    hard: { mines: 99, name: '困难', size: 22 },     // 22x22 的棋盘
-                    custom: { mines: 40, name: '自定义', size: 16 }  // 默认16x16
-                }
+                    easy: { mines: 20, name: "简单", size: 12 },
+                    medium: { mines: 40, name: "中等", size: 16 },
+                    hard: { mines: 99, name: "困难", size: 22 },
+                    custom: { mines: 40, name: "自定义", size: 16 },
+                },
+                mobileConfig: null,
             },
-            
+
             data: {
                 board: [],
                 revealed: [],
@@ -340,138 +453,177 @@
                 isFirstClick: true,
                 isPeeking: false,
                 savedState: null,
-                // 添加触雷前状态保存
-                lastState: null
+                lastState: null,
             },
-            
+
             calculateCellSize() {
-                // 获取视口尺寸
                 const viewportWidth = window.innerWidth;
                 const viewportHeight = window.innerHeight;
-                
-                // 移动端特别处理
                 const isMobile = window.innerWidth <= 768;
-                
+
                 if (isMobile) {
-                    // 计算可用空间
-                    const usableWidth = viewportWidth - 20;    // 预留左右边距
-                    const usableHeight = viewportHeight - 200;  // 预留顶部和底部UI的空间
-                    
-                    // 先计算每个格子的理想大小
-                    let cellSize;
-                    if (this.config.rows <= 12) { // 简单模式
-                        cellSize = 30;
-                    } else if (this.config.rows <= 16) { // 中等模式
-                        cellSize = 26;
-                    } else { // 困难模式
-                        cellSize = 22;
-                    }
-                    
-                    // 检查是否会超出屏幕宽度
-                    const totalWidth = this.config.cols * cellSize;
-                    if (totalWidth > usableWidth) {
-                        // 如果会超出，重新计算格子大小和列数
-                        const maxCols = Math.floor(usableWidth / cellSize);
-                        if (maxCols < this.config.cols) {
-                            // 调整列数和行数，保持大致相同的难度
-                            const reduction = this.config.cols - maxCols;
-                            this.config.cols = maxCols;
-                            this.config.rows = Math.max(this.config.rows - reduction, 8); // 确保最小8x8
-                            
-                            // 按比例调整地雷数
-                            const ratio = (maxCols * this.config.rows) / (this.config.cols * (this.config.rows + reduction));
-                            this.config.mines = Math.max(Math.floor(this.config.mines * ratio), 10); // 确保最少10个地雷
-                            
-                            // 需要重新初始化游戏数据
-                            this.data.board = Array(this.config.rows).fill().map(() => Array(this.config.cols).fill(0));
-                            this.data.revealed = Array(this.config.rows).fill().map(() => Array(this.config.cols).fill(false));
-                            this.data.flagged = Array(this.config.rows).fill().map(() => Array(this.config.cols).fill(false));
-                            this.data.mineCount = this.config.mines;
-                            this.data.isFirstClick = true;
+                    if (!this.config.mobileConfig) {
+                        this.config.mobileConfig = {
+                            easy: { ...this.config.difficulties.easy },
+                            medium: { ...this.config.difficulties.medium },
+                            hard: { ...this.config.difficulties.hard },
+                        };
+
+                        // 计算合适的格子大小
+                        const usableWidth = viewportWidth - 20; // 预留左右边距
+                        let cellSize = 30; // 默认格子大小
+
+                        // 根据屏幕宽度计算每行可以放置的格子数
+                        const cols = Math.floor(usableWidth / cellSize);
+
+                        // 为每个难度级别计算新的配置
+                        ["easy", "medium", "hard"].forEach((difficulty) => {
+                            const originalConfig = this.config.mobileConfig[difficulty];
+                            const originalArea = originalConfig.size * originalConfig.size;
+                            const originalDensity = originalConfig.mines / originalArea;
+
+                            // 计算新的行数，保持地雷密度
+                            const rows = Math.ceil(
+                                (originalArea * cellSize * cellSize) /
+                                (usableWidth * cellSize)
+                            );
+
+                            // 计算新的地雷数，保持密度
+                            const newArea = cols * rows;
+                            const newMines = Math.round(newArea * originalDensity);
+
+                            // 更新配置
+                            this.config.difficulties[difficulty] = {
+                                ...originalConfig,
+                                size: cols, // 列数等于最大可放置数
+                                rows: rows, // 单独存储行数
+                                cols: cols, // 单独存储列数
+                                mines: newMines,
+                            };
+                        });
+
+                        // 更新当前配置
+                        const currentDifficulty = document.querySelector(
+                            ".difficulty-btn.active"
+                        ).dataset.difficulty;
+                        if (currentDifficulty !== "custom") {
+                            const config = this.config.difficulties[currentDifficulty];
+                            this.config.rows = config.rows;
+                            this.config.cols = config.cols;
+                            this.config.mines = config.mines;
                         }
-                    }
-                    
-                    // 设置最终的格子大小
-                    this.config.cellSize = cellSize;
-                    
-                    // 更新容器样式以适应新的棋盘大小
-                    const container = document.querySelector('.game-container');
-                    if (container) {
-                        const boardWidth = this.config.cols * cellSize;
-                        const horizontalPadding = Math.max((viewportWidth - boardWidth - 20) / 2, 10);
-                        container.style.padding = `10px ${horizontalPadding}px`;
-                    }
-                    
-                    // 打印调试信息
-                    console.log('Mobile layout:');
-                    console.log('Viewport:', viewportWidth, 'x', viewportHeight);
-                    console.log('Board size:', this.config.rows, 'x', this.config.cols);
-                    console.log('Cell size:', cellSize);
-                    console.log('Mines:', this.config.mines);
-                    
-                    // 更新难度按钮文本
-                    const activeBtn = document.querySelector('.difficulty-btn.active');
-                    if (activeBtn) {
-                        const difficulty = activeBtn.dataset.difficulty;
-                        if (difficulty !== 'custom') {
-                            activeBtn.textContent = `${this.config.difficulties[difficulty].name} (${this.config.rows}×${this.config.cols}, ${this.config.mines}雷)`;
-                        }
+
+                        // 更新难度按钮文本
+                        document.querySelectorAll(".difficulty-btn").forEach((btn) => {
+                            const diff = btn.dataset.difficulty;
+                            if (diff !== "custom") {
+                                const config = this.config.difficulties[diff];
+                                btn.textContent = `${config.name} (${config.cols}×${config.rows}, ${config.mines}雷)`;
+                            }
+                        });
+
+                        this.config.cellSize = cellSize;
                     }
                 } else {
-                    // PC端保持原有逻辑
+                    // PC端恢复原始配置
+                    if (this.config.mobileConfig) {
+                        Object.assign(this.config.difficulties, this.config.mobileConfig);
+                        this.config.mobileConfig = null;
+
+                        const currentDifficulty = document.querySelector(
+                            ".difficulty-btn.active"
+                        ).dataset.difficulty;
+                        if (currentDifficulty !== "custom") {
+                            const config = this.config.difficulties[currentDifficulty];
+                            this.config.rows = config.size;
+                            this.config.cols = config.size;
+                            this.config.mines = config.mines;
+                        }
+
+                        document.querySelectorAll(".difficulty-btn").forEach((btn) => {
+                            const diff = btn.dataset.difficulty;
+                            if (diff !== "custom") {
+                                const config = this.config.difficulties[diff];
+                                btn.textContent = `${config.name} (${config.size}×${config.size}, ${config.mines}雷)`;
+                            }
+                        });
+                    }
+
+                    // PC端的格子大小计算
                     const containerPadding = 40;
                     const controlsHeight = 120;
                     const difficultyHeight = 60;
-                    
-                    const availableWidth = viewportWidth - (containerPadding * 2);
-                    const availableHeight = viewportHeight - (containerPadding * 2) - controlsHeight - difficultyHeight;
-                    
-                    const maxCellSizeByWidth = Math.floor(availableWidth / this.config.cols);
-                    const maxCellSizeByHeight = Math.floor(availableHeight / this.config.rows);
-                    
-                    this.config.cellSize = Math.min(Math.max(
-                        Math.min(maxCellSizeByWidth, maxCellSizeByHeight),
-                        25
-                    ), 40);
+
+                    const availableWidth = viewportWidth - containerPadding * 2;
+                    const availableHeight =
+                        viewportHeight -
+                        containerPadding * 2 -
+                        controlsHeight -
+                        difficultyHeight;
+
+                    const maxCellSizeByWidth = Math.floor(
+                        availableWidth / this.config.cols
+                    );
+                    const maxCellSizeByHeight = Math.floor(
+                        availableHeight / this.config.rows
+                    );
+
+                    this.config.cellSize = Math.min(
+                        Math.max(Math.min(maxCellSizeByWidth, maxCellSizeByHeight), 25),
+                        40
+                    );
                 }
             },
-            
+
             init() {
-                this.calculateCellSize();  // 初始化时计算格子大小
+                this.calculateCellSize(); // 初始化时计算格子大小
                 // 初始化数据
-                this.data.board = Array(this.config.rows).fill().map(() => Array(this.config.cols).fill(0));
-                this.data.revealed = Array(this.config.rows).fill().map(() => Array(this.config.cols).fill(false));
-                this.data.flagged = Array(this.config.rows).fill().map(() => Array(this.config.cols).fill(false));
-                this.data.mineCount = this.config.mines;  // 确保使用当前配置的地雷数
+                this.data.board = Array(this.config.rows)
+                    .fill()
+                    .map(() => Array(this.config.cols).fill(0));
+                this.data.revealed = Array(this.config.rows)
+                    .fill()
+                    .map(() => Array(this.config.cols).fill(false));
+                this.data.flagged = Array(this.config.rows)
+                    .fill()
+                    .map(() => Array(this.config.cols).fill(false));
+                this.data.mineCount = this.config.mines; // 确保使用当前配置的地雷数
                 this.data.gameOver = false;
                 this.data.isFirstClick = true;
             },
-            
+
             // 添加新方法：放置地雷
             placeMines(firstRow, firstCol) {
                 let minesPlaced = 0;
-                const totalMines = this.config.mines;  // 使用当前配置的地雷数
-                
-                while (minesPlaced < totalMines) {  // 使用局部变量确保放置正确数量的地雷
+                const totalMines = this.config.mines; // 使用当前配置的地雷数
+
+                while (minesPlaced < totalMines) {
+                    // 使用局部变量确保放置正确数量的地雷
                     const row = Math.floor(Math.random() * this.config.rows);
                     const col = Math.floor(Math.random() * this.config.cols);
-                    
-                    if (this.data.board[row][col] !== -1 && 
-                        (Math.abs(row - firstRow) > 1 || Math.abs(col - firstCol) > 1)) {
+
+                    if (
+                        this.data.board[row][col] !== -1 &&
+                        (Math.abs(row - firstRow) > 1 || Math.abs(col - firstCol) > 1)
+                    ) {
                         this.data.board[row][col] = -1;
                         minesPlaced++;
-                        
+
                         // 更新周围格子的数字
-                        for(let i = -1; i <= 1; i++) {
-                            for(let j = -1; j <= 1; j++) {
+                        for (let i = -1; i <= 1; i++) {
+                            for (let j = -1; j <= 1; j++) {
                                 if (i === 0 && j === 0) continue;
-                                
+
                                 const newRow = row + i;
                                 const newCol = col + j;
-                                
-                                if (newRow >= 0 && newRow < this.config.rows &&
-                                    newCol >= 0 && newCol < this.config.cols &&
-                                    this.data.board[newRow][newCol] !== -1) {
+
+                                if (
+                                    newRow >= 0 &&
+                                    newRow < this.config.rows &&
+                                    newCol >= 0 &&
+                                    newCol < this.config.cols &&
+                                    this.data.board[newRow][newCol] !== -1
+                                ) {
                                     this.data.board[newRow][newCol]++;
                                 }
                             }
@@ -479,7 +631,7 @@
                     }
                 }
             },
-            
+
             reveal(row, col) {
                 if (this.data.gameOver) {
                     return;
@@ -488,29 +640,37 @@
                 // 如果点击的是已经显示的格子
                 if (this.data.revealed[row][col]) {
                     const number = this.data.board[row][col];
-                    if (number > 0) {  // 只处理显示数字的格子
+                    if (number > 0) {
+                        // 只处理显示数字的格子
                         // 计算周围未开格子和已标记地雷数
                         let unrevealedCount = 0;
                         let flagCount = 0;
                         let unrevealedCells = [];
-                        
+
                         for (let i = -1; i <= 1; i++) {
                             for (let j = -1; j <= 1; j++) {
                                 const newRow = row + i;
                                 const newCol = col + j;
-                                if (newRow >= 0 && newRow < this.config.rows &&
-                                    newCol >= 0 && newCol < this.config.cols) {
+                                if (
+                                    newRow >= 0 &&
+                                    newRow < this.config.rows &&
+                                    newCol >= 0 &&
+                                    newCol < this.config.cols
+                                ) {
                                     if (this.data.flagged[newRow][newCol]) {
                                         flagCount++;
                                     }
-                                    if (!this.data.revealed[newRow][newCol] && !this.data.flagged[newRow][newCol]) {
+                                    if (
+                                        !this.data.revealed[newRow][newCol] &&
+                                        !this.data.flagged[newRow][newCol]
+                                    ) {
                                         unrevealedCount++;
                                         unrevealedCells.push([newRow, newCol]);
                                     }
                                 }
                             }
                         }
-                        
+
                         // 如果未开格子数量 + 已标记数量 = 数字，则标记所有未开格子
                         if (unrevealedCount + flagCount === number) {
                             unrevealedCells.forEach(([r, c]) => {
@@ -518,17 +678,21 @@
                             });
                             return;
                         }
-                        
+
                         // 如果标记数等于格子显示的数字，打开周围未标记的格子
                         if (flagCount === number) {
                             for (let i = -1; i <= 1; i++) {
                                 for (let j = -1; j <= 1; j++) {
                                     const newRow = row + i;
                                     const newCol = col + j;
-                                    if (newRow >= 0 && newRow < this.config.rows &&
-                                        newCol >= 0 && newCol < this.config.cols &&
+                                    if (
+                                        newRow >= 0 &&
+                                        newRow < this.config.rows &&
+                                        newCol >= 0 &&
+                                        newCol < this.config.cols &&
                                         !this.data.revealed[newRow][newCol] &&
-                                        !this.data.flagged[newRow][newCol]) {
+                                        !this.data.flagged[newRow][newCol]
+                                    ) {
                                         this.reveal(newRow, newCol);
                                     }
                                 }
@@ -537,34 +701,34 @@
                     }
                     return;
                 }
-                
+
                 if (this.data.flagged[row][col]) {
                     return;
                 }
-                
+
                 // 处理第一次点击
                 if (this.data.isFirstClick) {
                     this.data.isFirstClick = false;
-                    this.placeMines(row, col);  // 在第一次点击后才放置地雷
+                    this.placeMines(row, col); // 在第一次点击后才放置地雷
                 }
-                
+
                 this.data.revealed[row][col] = true;
-                
+
                 if (this.data.board[row][col] === -1) {
                     // 触雷前保存当前状态和触雷位置
                     this.data.lastState = {
                         revealed: JSON.parse(JSON.stringify(this.data.revealed)),
                         flagged: JSON.parse(JSON.stringify(this.data.flagged)),
                         mineCount: this.data.mineCount,
-                        lastMineRow: row,    // 保存触雷的行
-                        lastMineCol: col     // 保存触雷的列
+                        lastMineRow: row, // 保存触雷的行
+                        lastMineCol: col, // 保存触雷的列
                     };
                     // 先显示这个地雷
                     renderBoard();
-                    
+
                     // 询问是否重试
                     setTimeout(() => {
-                        if (confirm('踩到地雷了！是否重试？')) {
+                        if (confirm("踩到地雷了！是否重试？")) {
                             this.retry();
                         } else {
                             this.gameOver(false);
@@ -572,27 +736,31 @@
                     }, 100);
                     return;
                 }
-                
+
                 if (this.data.board[row][col] === 0) {
                     this.revealArea(row, col);
                 }
-                
+
                 this.checkWin();
             },
-            
+
             ensureSafeArea(row, col) {
                 const safeArea = [];
                 for (let i = -1; i <= 1; i++) {
                     for (let j = -1; j <= 1; j++) {
                         const newRow = row + i;
                         const newCol = col + j;
-                        if (newRow >= 0 && newRow < this.config.rows &&
-                            newCol >= 0 && newCol < this.config.cols) {
+                        if (
+                            newRow >= 0 &&
+                            newRow < this.config.rows &&
+                            newCol >= 0 &&
+                            newCol < this.config.cols
+                        ) {
                             safeArea.push([newRow, newCol]);
                         }
                     }
                 }
-                
+
                 safeArea.forEach(([r, c]) => {
                     if (this.data.board[r][c] === -1) {
                         this.data.board[r][c] = 0;
@@ -600,30 +768,40 @@
                             for (let j = -1; j <= 1; j++) {
                                 const nr = r + i;
                                 const nc = c + j;
-                                if (nr >= 0 && nr < this.config.rows &&
-                                    nc >= 0 && nc < this.config.cols &&
-                                    this.data.board[nr][nc] !== -1) {
+                                if (
+                                    nr >= 0 &&
+                                    nr < this.config.rows &&
+                                    nc >= 0 &&
+                                    nc < this.config.cols &&
+                                    this.data.board[nr][nc] !== -1
+                                ) {
                                     this.data.board[nr][nc]--;
                                 }
                             }
                         }
                     }
                 });
-                
+
                 for (let i = 0; i < this.config.rows; i++) {
                     for (let j = 0; j < this.config.cols; j++) {
-                        if (!safeArea.some(([r, c]) => r === i && c === j) && 
+                        if (
+                            !safeArea.some(([r, c]) => r === i && c === j) &&
                             this.data.board[i][j] !== -1 &&
-                            Math.random() < 0.2) {
+                            Math.random() < 0.2
+                        ) {
                             this.data.board[i][j] = -1;
                             for (let di = -1; di <= 1; di++) {
                                 for (let dj = -1; dj <= 1; dj++) {
                                     if (di === 0 && dj === 0) continue;
                                     const nr = i + di;
                                     const nc = j + dj;
-                                    if (nr >= 0 && nr < this.config.rows &&
-                                        nc >= 0 && nc < this.config.cols &&
-                                        this.data.board[nr][nc] !== -1) {
+                                    if (
+                                        nr >= 0 &&
+                                        nr < this.config.rows &&
+                                        nc >= 0 &&
+                                        nc < this.config.cols &&
+                                        this.data.board[nr][nc] !== -1
+                                    ) {
                                         this.data.board[nr][nc]++;
                                     }
                                 }
@@ -632,17 +810,21 @@
                     }
                 }
             },
-            
+
             revealArea(row, col) {
                 for (let i = -1; i <= 1; i++) {
                     for (let j = -1; j <= 1; j++) {
                         const newRow = row + i;
                         const newCol = col + j;
-                        
-                        if (newRow >= 0 && newRow < this.config.rows &&
-                            newCol >= 0 && newCol < this.config.cols &&
+
+                        if (
+                            newRow >= 0 &&
+                            newRow < this.config.rows &&
+                            newCol >= 0 &&
+                            newCol < this.config.cols &&
                             !this.data.revealed[newRow][newCol] &&
-                            !this.data.flagged[newRow][newCol]) {
+                            !this.data.flagged[newRow][newCol]
+                        ) {
                             this.data.revealed[newRow][newCol] = true;
                             if (this.data.board[newRow][newCol] === 0) {
                                 this.revealArea(newRow, newCol);
@@ -651,12 +833,12 @@
                     }
                 }
             },
-            
+
             flag(row, col) {
                 if (this.data.gameOver || this.data.revealed[row][col]) {
                     return;
                 }
-                
+
                 if (!this.data.flagged[row][col] && this.data.mineCount > 0) {
                     this.data.flagged[row][col] = true;
                     this.data.mineCount--;
@@ -664,11 +846,14 @@
                     this.data.flagged[row][col] = false;
                     this.data.mineCount++;
                 }
+
+                // 更新显示
+                document.getElementById("remaining-mines").textContent = this.data.mineCount;
             },
-            
+
             checkWin() {
-                for(let i = 0; i < this.config.rows; i++) {
-                    for(let j = 0; j < this.config.cols; j++) {
+                for (let i = 0; i < this.config.rows; i++) {
+                    for (let j = 0; j < this.config.cols; j++) {
                         if (this.data.board[i][j] !== -1 && !this.data.revealed[i][j]) {
                             return false;
                         }
@@ -677,13 +862,13 @@
                 this.gameOver(true);
                 return true;
             },
-            
+
             gameOver(isWin) {
                 this.data.gameOver = true;
                 if (!isWin) {
                     // 显示所有地雷
-                    for(let i = 0; i < this.config.rows; i++) {
-                        for(let j = 0; j < this.config.cols; j++) {
+                    for (let i = 0; i < this.config.rows; i++) {
+                        for (let j = 0; j < this.config.cols; j++) {
                             if (this.data.board[i][j] === -1) {
                                 this.data.revealed[i][j] = true;
                             }
@@ -691,116 +876,125 @@
                     }
                     renderBoard();
                     setTimeout(() => {
-                        alert('游戏结束！');
+                        alert("游戏结束！");
                     }, 100);
                 } else {
                     setTimeout(() => {
-                        alert('恭喜你赢了！');
+                        alert("恭喜你赢了！");
                     }, 100);
                 }
             },
-            
+
             // 添加设置棋盘大小的方法
             setBoardSize(mines) {
                 // 根据地雷数量动态计算合适的棋盘大小
                 let size;
                 if (mines <= 20) {
-                    size = 12;  // 小棋盘
+                    size = 12; // 小棋盘
                 } else if (mines <= 40) {
-                    size = 16;  // 中等棋盘
+                    size = 16; // 中等棋盘
                 } else if (mines <= 60) {
-                    size = 19;  // 较大棋盘
+                    size = 19; // 较大棋盘
                 } else {
-                    size = 22;  // 最大棋盘
+                    size = 22; // 最大棋盘
                 }
-                
+
                 this.config.rows = size;
                 this.config.cols = size;
             },
-            
+
             // 添加重试方法
             retry() {
                 if (this.data.lastState) {
-                    this.data.revealed = JSON.parse(JSON.stringify(this.data.lastState.revealed));
-                    this.data.flagged = JSON.parse(JSON.stringify(this.data.lastState.flagged));
+                    this.data.revealed = JSON.parse(
+                        JSON.stringify(this.data.lastState.revealed)
+                    );
+                    this.data.flagged = JSON.parse(
+                        JSON.stringify(this.data.lastState.flagged)
+                    );
                     this.data.mineCount = this.data.lastState.mineCount;
                     this.data.gameOver = false;
                     // 移除最后一步显示的地雷
-                    this.data.revealed[this.data.lastState.lastMineRow][this.data.lastState.lastMineCol] = false;
+                    this.data.revealed[this.data.lastState.lastMineRow][
+                        this.data.lastState.lastMineCol
+                    ] = false;
                     renderBoard();
                 }
-            }
+            },
         };
-        
+
         // 添加渲染和事件处理代码
         function renderBoard() {
-            const board = document.getElementById('board');
-            board.innerHTML = '';
-            
-            for(let i = 0; i < MineSweeper.config.rows; i++) {
-                const row = document.createElement('div');
-                row.className = 'row';
-                
-                for(let j = 0; j < MineSweeper.config.cols; j++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
+            const board = document.getElementById("board");
+            board.innerHTML = "";
+
+            for (let i = 0; i < MineSweeper.config.rows; i++) {
+                const row = document.createElement("div");
+                row.className = "row";
+
+                for (let j = 0; j < MineSweeper.config.cols; j++) {
+                    const cell = document.createElement("div");
+                    cell.className = "cell";
                     // 添加数据属性存储坐标
                     cell.dataset.row = i;
                     cell.dataset.col = j;
-                    
-                    if(MineSweeper.data.revealed[i][j]) {
-                        cell.classList.add('revealed');
-                        if(MineSweeper.data.board[i][j] === -1) {
-                            cell.classList.add('mine');
-                            cell.textContent = '💣';
-                        } else if(MineSweeper.data.board[i][j] > 0) {
+
+                    if (MineSweeper.data.revealed[i][j]) {
+                        cell.classList.add("revealed");
+                        if (MineSweeper.data.board[i][j] === -1) {
+                            cell.classList.add("mine");
+                            cell.textContent = "💣";
+                        } else if (MineSweeper.data.board[i][j] > 0) {
                             cell.textContent = MineSweeper.data.board[i][j];
-                            cell.setAttribute('data-number', MineSweeper.data.board[i][j]);
+                            cell.setAttribute("data-number", MineSweeper.data.board[i][j]);
                         }
-                        
-                        if(MineSweeper.data.isPeeking && !MineSweeper.data.savedState.revealed[i][j]) {
-                            cell.classList.add('peeking');
+
+                        if (
+                            MineSweeper.data.isPeeking &&
+                            !MineSweeper.data.savedState.revealed[i][j]
+                        ) {
+                            cell.classList.add("peeking");
                         }
-                    } else if(MineSweeper.data.flagged[i][j]) {
-                        cell.classList.add('flagged');
-                        cell.textContent = '🚩';
+                    } else if (MineSweeper.data.flagged[i][j]) {
+                        cell.classList.add("flagged");
+                        cell.textContent = "🚩";
                     }
-                    
+
                     row.appendChild(cell);
                 }
                 board.appendChild(row);
             }
 
             // 如果还没有添加过事件监听，则添加
-            if (!board.hasAttribute('data-events-attached')) {
+            if (!board.hasAttribute("data-events-attached")) {
                 // 鼠标按下事件
-                board.addEventListener('mousedown', handleMouseDown);
+                board.addEventListener("mousedown", handleMouseDown);
                 // 鼠标移动事件
-                board.addEventListener('mouseover', handleMouseOver);
+                board.addEventListener("mouseover", handleMouseOver);
                 // 鼠标离开事件
-                board.addEventListener('mouseout', handleMouseOut);
+                board.addEventListener("mouseout", handleMouseOut);
                 // 鼠标右键事件
-                board.addEventListener('contextmenu', handleContextMenu);
+                board.addEventListener("contextmenu", handleContextMenu);
                 // 点击事件
-                board.addEventListener('click', handleClick);
-                
+                board.addEventListener("click", handleClick);
+
                 // 标记已添加事件监听
-                board.setAttribute('data-events-attached', 'true');
+                board.setAttribute("data-events-attached", "true");
             }
         }
 
         // 事件处理函数
         function handleMouseDown(e) {
             if (MineSweeper.data.isPeeking || e.button !== 0) return;
-            
-            const cell = e.target.closest('.cell');
+
+            const cell = e.target.closest(".cell");
             if (!cell) return;
 
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
 
             if (!MineSweeper.data.revealed[row][col]) {
-                cell.classList.add('pressing');
+                cell.classList.add("pressing");
             } else if (MineSweeper.data.board[row][col] > 0) {
                 pressNeighbors(row, col);
             }
@@ -808,76 +1002,81 @@
 
         function handleMouseOver(e) {
             if (MineSweeper.data.isPeeking || !e.buttons) return;
-            
-            const cell = e.target.closest('.cell');
+
+            const cell = e.target.closest(".cell");
             if (!cell) return;
 
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
 
             if (!MineSweeper.data.revealed[row][col]) {
-                cell.classList.add('pressing');
+                cell.classList.add("pressing");
             } else if (MineSweeper.data.board[row][col] > 0) {
                 pressNeighbors(row, col);
             }
         }
 
         function handleMouseOut(e) {
-            const cell = e.target.closest('.cell');
+            const cell = e.target.closest(".cell");
             if (!cell) return;
-            
-            cell.classList.remove('pressing');
+
+            cell.classList.remove("pressing");
             clearAllPressing();
         }
 
         function handleContextMenu(e) {
             e.preventDefault();
             if (MineSweeper.data.isPeeking) return;
-            
-            const cell = e.target.closest('.cell');
+
+            const cell = e.target.closest(".cell");
             if (!cell) return;
 
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
-            
+
             MineSweeper.flag(row, col);
             renderBoard();
-            document.getElementById('mineCount').textContent = MineSweeper.data.mineCount;
         }
 
         function handleClick(e) {
             if (MineSweeper.data.isPeeking) return;
-            
-            const cell = e.target.closest('.cell');
+
+            const cell = e.target.closest(".cell");
             if (!cell) return;
 
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
-            
+
             MineSweeper.reveal(row, col);
         }
 
         // 添加全局鼠标抬起事件
-        document.addEventListener('mouseup', () => {
+        document.addEventListener("mouseup", () => {
             clearAllPressing();
         });
 
         // 添加按下周围格子的函数
         function pressNeighbors(row, col) {
-            for(let i = -1; i <= 1; i++) {
-                for(let j = -1; j <= 1; j++) {
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
                     const newRow = row + i;
                     const newCol = col + j;
-                    
-                    if (newRow >= 0 && newRow < MineSweeper.config.rows &&
-                        newCol >= 0 && newCol < MineSweeper.config.cols) {
-                        const cells = document.querySelectorAll('.cell');
+
+                    if (
+                        newRow >= 0 &&
+                        newRow < MineSweeper.config.rows &&
+                        newCol >= 0 &&
+                        newCol < MineSweeper.config.cols
+                    ) {
+                        const cells = document.querySelectorAll(".cell");
                         const index = newRow * MineSweeper.config.cols + newCol;
                         const neighborCell = cells[index];
-                        
-                        if (!MineSweeper.data.revealed[newRow][newCol] && 
-                            !MineSweeper.data.flagged[newRow][newCol]) {
-                            neighborCell.classList.add('pressing-neighbor');
+
+                        if (
+                            !MineSweeper.data.revealed[newRow][newCol] &&
+                            !MineSweeper.data.flagged[newRow][newCol]
+                        ) {
+                            neighborCell.classList.add("pressing-neighbor");
                         }
                     }
                 }
@@ -886,20 +1085,23 @@
 
         // 修改样式相关的代码
         function updateStyles() {
-            const oldStyle = document.getElementById('dynamic-cell-styles');
+            const oldStyle = document.getElementById("dynamic-cell-styles");
             if (oldStyle) {
                 oldStyle.remove();
             }
 
-            const styleSheet = document.createElement('style');
-            styleSheet.id = 'dynamic-cell-styles';
-            
+            const styleSheet = document.createElement("style");
+            styleSheet.id = "dynamic-cell-styles";
+
             // 添加响应式样式
             styleSheet.textContent = `
                 .cell {
                     width: ${MineSweeper.config.cellSize}px;
                     height: ${MineSweeper.config.cellSize}px;
-                    font-size: ${Math.max(MineSweeper.config.cellSize * 0.5, 12)}px;
+                    font-size: ${Math.max(
+                MineSweeper.config.cellSize * 0.5,
+                12
+            )}px;
                 }
                 
                 @media (max-width: 768px) {
@@ -936,54 +1138,65 @@
         }
 
         function resetGame() {
+            const currentDifficulty = document.querySelector(
+                ".difficulty-btn.active"
+            ).dataset.difficulty;
+            if (currentDifficulty !== "custom") {
+                const config = MineSweeper.config.difficulties[currentDifficulty];
+                MineSweeper.config.mines = config.mines;
+                MineSweeper.config.rows = config.rows || config.size;
+                MineSweeper.config.cols = config.cols || config.size;
+            }
+
             MineSweeper.data.isPeeking = false;
             MineSweeper.data.savedState = null;
-            document.querySelector('.peek-button').classList.remove('active');
-            document.querySelector('.peek-button').textContent = '查看地雷';
+            document.querySelector(".peek-button").classList.remove("active");
+            document.querySelector(".peek-button").textContent = "查看地雷";
             MineSweeper.init();
             updateStyles();
             renderBoard();
-            document.getElementById('mineCount').textContent = MineSweeper.data.mineCount;
+            // 重置时更新剩余地雷数显示
+            document.getElementById("remaining-mines").textContent = MineSweeper.config.mines;
         }
 
         // 修改 gameOver 方法来更新界面
         const originalGameOver = MineSweeper.gameOver;
-        MineSweeper.gameOver = function(isWin) {
+        MineSweeper.gameOver = function (isWin) {
             originalGameOver.call(this, isWin);
             renderBoard();
-        }
+        };
 
         // 修改 reveal 方法来更新界面
         const originalReveal = MineSweeper.reveal;
-        MineSweeper.reveal = function(row, col) {
+        MineSweeper.reveal = function (row, col) {
             originalReveal.call(this, row, col);
             renderBoard();
-        }
+        };
 
         // 添加窗口大小改变事件监听
-        window.addEventListener('resize', () => {
+        window.addEventListener("resize", () => {
             resetGame();
         });
 
         // 添加难度选择的事件处理
         function initDifficultySelector() {
-            const buttons = document.querySelectorAll('.difficulty-btn');
-            const customInput = document.getElementById('customMines');
-            
-            buttons.forEach(btn => {
-                btn.addEventListener('click', () => {
+            const buttons = document.querySelectorAll(".difficulty-btn");
+            const customInput = document.getElementById("customMines");
+
+            buttons.forEach((btn) => {
+                btn.addEventListener("click", () => {
                     // 移除其他按钮的active类
-                    buttons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    
+                    buttons.forEach((b) => b.classList.remove("active"));
+                    btn.classList.add("active");
+
                     const difficulty = btn.dataset.difficulty;
-                    if (difficulty === 'custom') {
+                    if (difficulty === "custom") {
                         const mines = parseInt(customInput.value);
                         if (mines >= 10 && mines <= 80) {
                             MineSweeper.config.mines = mines;
-                            MineSweeper.setBoardSize(mines);  // 设置棋盘大小
+                            MineSweeper.setBoardSize(mines); // 设置棋盘大小
                         } else {
-                            alert('请输入10-80之间的数字');
+                            alert("请输入10-80之间的数字");
                             return;
                         }
                     } else {
@@ -992,13 +1205,13 @@
                         MineSweeper.config.rows = config.size;
                         MineSweeper.config.cols = config.size;
                     }
-                    
+
                     resetGame();
                 });
             });
-            
+
             // 自定义输入框的处理
-            customInput.addEventListener('change', () => {
+            customInput.addEventListener("change", () => {
                 const mines = parseInt(customInput.value);
                 if (mines < 10) customInput.value = 10;
                 if (mines > 80) customInput.value = 80;
@@ -1013,46 +1226,245 @@
 
         // 添加预览切换函数
         function togglePeek() {
-            const peekButton = document.querySelector('.peek-button');
-            
+            const peekButton = document.querySelector(".peek-button");
+
             if (!MineSweeper.data.isPeeking) {
                 // 保存当前状态
                 MineSweeper.data.savedState = {
                     revealed: JSON.parse(JSON.stringify(MineSweeper.data.revealed)),
-                    flagged: JSON.parse(JSON.stringify(MineSweeper.data.flagged))
+                    flagged: JSON.parse(JSON.stringify(MineSweeper.data.flagged)),
                 };
-                
+
                 // 显示所有格子
-                for(let i = 0; i < MineSweeper.config.rows; i++) {
-                    for(let j = 0; j < MineSweeper.config.cols; j++) {
+                for (let i = 0; i < MineSweeper.config.rows; i++) {
+                    for (let j = 0; j < MineSweeper.config.cols; j++) {
                         MineSweeper.data.revealed[i][j] = true;
                     }
                 }
-                
+
                 MineSweeper.data.isPeeking = true;
-                peekButton.classList.add('active');
-                peekButton.textContent = '恢复游戏';
+                peekButton.classList.add("active");
+                peekButton.textContent = "恢复游戏";
             } else {
                 // 恢复保存的状态
-                MineSweeper.data.revealed = JSON.parse(JSON.stringify(MineSweeper.data.savedState.revealed));
-                MineSweeper.data.flagged = JSON.parse(JSON.stringify(MineSweeper.data.savedState.flagged));
-                
+                MineSweeper.data.revealed = JSON.parse(
+                    JSON.stringify(MineSweeper.data.savedState.revealed)
+                );
+                MineSweeper.data.flagged = JSON.parse(
+                    JSON.stringify(MineSweeper.data.savedState.flagged)
+                );
+
                 MineSweeper.data.isPeeking = false;
-                peekButton.classList.remove('active');
-                peekButton.textContent = '查看地雷';
+                peekButton.classList.remove("active");
+                peekButton.textContent = "查看地雷";
             }
-            
+
             renderBoard();
         }
 
         // 添加清除所有按压效果的辅助函数
         function clearAllPressing() {
-            document.querySelectorAll('.pressing, .pressing-neighbor')
-                .forEach(cell => {
-                    cell.classList.remove('pressing');
-                    cell.classList.remove('pressing-neighbor');
+            document
+                .querySelectorAll(".pressing, .pressing-neighbor")
+                .forEach((cell) => {
+                    cell.classList.remove("pressing");
+                    cell.classList.remove("pressing-neighbor");
                 });
+        }
+
+        // 添加移动端设置相关代码
+        function initMobileSettings() {
+            const settingsBtn = document.querySelector(".mobile-settings-btn");
+            const settingsModal = document.querySelector(".settings-modal");
+            const closeBtn = document.querySelector(".close-settings");
+            const settingsContent = document.querySelector(
+                ".settings-content .difficulty-selector"
+            );
+            const originalSelector = document.querySelector(
+                ".game-container .difficulty-selector"
+            );
+
+            // 将原有的难度选择器内容复制到弹出框中
+            settingsContent.innerHTML = originalSelector.innerHTML;
+
+            // 重新初始化难度选择器的事件监听
+            initDifficultySelector();
+
+            // 打开设置
+            settingsBtn.addEventListener("click", () => {
+                settingsModal.style.display = "block";
+            });
+
+            // 关闭设置
+            closeBtn.addEventListener("click", () => {
+                settingsModal.style.display = "none";
+            });
+
+            // 点击外部区域关闭
+            settingsModal.addEventListener("click", (e) => {
+                if (e.target === settingsModal) {
+                    settingsModal.style.display = "none";
+                }
+            });
+        }
+
+        // 在初始化时调用
+        initMobileSettings();
+
+        function initDraggableButton() {
+            const btn = document.querySelector(".mobile-settings-btn");
+            let isDragging = false;
+            let startX, startY, initialX, initialY;
+            let longPressTimer;
+            const LONG_PRESS_DURATION = 500; // 长按触发时间（毫秒）
+
+            // 保存按钮位置到 localStorage
+            function saveButtonPosition(x, y) {
+                localStorage.setItem("settingsBtnPosition", JSON.stringify({ x, y }));
+            }
+
+            // 从 localStorage 加载按钮位置
+            function loadButtonPosition() {
+                const pos = localStorage.getItem("settingsBtnPosition");
+                if (pos) {
+                    const { x, y } = JSON.parse(pos);
+                    btn.style.left = x + "px";
+                    btn.style.right = "auto";
+                    btn.style.top = y + "px";
+                    btn.style.transform = "none";
+                }
+            }
+
+            // 初始化时加载保存的位置
+            loadButtonPosition();
+
+            // 吸附到边缘
+            function snapToEdge(x, y) {
+                const rect = btn.getBoundingClientRect();
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+
+                // 计算按钮中心点
+                const centerX = x + rect.width / 2;
+
+                // 吸附到左边或右边
+                if (centerX < windowWidth / 2) {
+                    x = 10; // 左边距
+                } else {
+                    x = windowWidth - rect.width - 10; // 右边距
+                }
+
+                // 确保不超出上下边界
+                y = Math.max(10, Math.min(windowHeight - rect.height - 10, y));
+
+                return { x, y };
+            }
+
+            // 触摸事件处理
+            btn.addEventListener("touchstart", (e) => {
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+                initialX = btn.offsetLeft;
+                initialY = btn.offsetTop;
+
+                // 设置长按定时器
+                longPressTimer = setTimeout(() => {
+                    isDragging = true;
+                    btn.classList.add("dragging");
+                }, LONG_PRESS_DURATION);
+            });
+
+            btn.addEventListener("touchmove", (e) => {
+                if (!isDragging) {
+                    // 如果移动距离过大，取消长按
+                    const touch = e.touches[0];
+                    const moveX = Math.abs(touch.clientX - startX);
+                    const moveY = Math.abs(touch.clientY - startY);
+                    if (moveX > 5 || moveY > 5) {
+                        clearTimeout(longPressTimer);
+                    }
+                    return;
+                }
+
+                e.preventDefault();
+                const touch = e.touches[0];
+                let newX = initialX + (touch.clientX - startX);
+                let newY = initialY + (touch.clientY - startY);
+
+                btn.style.right = "auto";
+                btn.style.left = newX + "px";
+                btn.style.top = newY + "px";
+                btn.style.transform = "none";
+            });
+
+            function endDragging() {
+                if (isDragging) {
+                    isDragging = false;
+                    btn.classList.remove("dragging");
+
+                    // 获取当前位置并吸附到边缘
+                    const rect = btn.getBoundingClientRect();
+                    const { x, y } = snapToEdge(rect.left, rect.top);
+
+                    // 应用吸附后的位置
+                    btn.style.left = x + "px";
+                    btn.style.top = y + "px";
+
+                    // 保存位置
+                    saveButtonPosition(x, y);
+                }
+                clearTimeout(longPressTimer);
+            }
+
+            btn.addEventListener("touchend", endDragging);
+            btn.addEventListener("touchcancel", endDragging);
+
+            // 点击事件（非拖动时）
+            btn.addEventListener("click", (e) => {
+                if (!isDragging) {
+                    // 打开设置面板
+                    document.querySelector(".settings-modal").style.display = "block";
+                }
+            });
+        }
+
+        // 在初始化时调用
+        initDraggableButton();
+
+        let totalMines = 0;  // 添加一个变量来存储总地雷数
+        let markedMines = 0; // 添加一个变量来存储已标记的地雷数
+
+        function initGame() {
+            // ... existing code ...
+            totalMines = mineCount;
+            markedMines = 0;
+            updateMineCounter();
+            // ... existing code ...
+        }
+
+        function updateMineCounter() {
+            document.getElementById('remaining-mines').textContent = totalMines - markedMines;
+        }
+
+        function handleRightClick(event) {
+            event.preventDefault();
+            if (!gameStarted) return;
+            
+            const cell = event.target;
+            if (cell.classList.contains('revealed')) return;
+            
+            if (cell.classList.contains('marked')) {
+                cell.classList.remove('marked');
+                markedMines--;
+            } else {
+                cell.classList.add('marked');
+                markedMines++;
+            }
+            
+            updateMineCounter();
         }
     </script>
 </body>
+
 </html>
