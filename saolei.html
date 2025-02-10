@@ -449,6 +449,18 @@
                     custom: { mines: 40, name: "自定义", size: 16 },
                 },
                 mobileConfig: null,
+                sounds: {
+                    reveal: null,
+                    flag: null,
+                    mine: null,
+                    win: null
+                },
+                soundUrls: {
+                    reveal: "./saolei_resource/reveal.mp3",
+                    flag: "./saolei_resource/flag.mp3",
+                    mine: "./saolei_resource/mine.mp3",
+                    win: "./saolei_resource/win.mp3"
+                }
             },
 
             data: {
@@ -648,12 +660,12 @@
                 if (this.data.revealed[row][col]) {
                     const number = this.data.board[row][col];
                     if (number > 0) {
-                        // 只处理显示数字的格子
-                        // 计算周围未开格子和已标记地雷数
-                        let unrevealedCount = 0;
                         let flagCount = 0;
+                        let unrevealedCount = 0;
                         let unrevealedCells = [];
+                        let hasSafeCell = false;
 
+                        // 检查周围的格子
                         for (let i = -1; i <= 1; i++) {
                             for (let j = -1; j <= 1; j++) {
                                 const newRow = row + i;
@@ -667,12 +679,13 @@
                                     if (this.data.flagged[newRow][newCol]) {
                                         flagCount++;
                                     }
-                                    if (
-                                        !this.data.revealed[newRow][newCol] &&
-                                        !this.data.flagged[newRow][newCol]
-                                    ) {
+                                    if (!this.data.revealed[newRow][newCol] && !this.data.flagged[newRow][newCol]) {
                                         unrevealedCount++;
                                         unrevealedCells.push([newRow, newCol]);
+                                        // 检查是否有未打开且不是地雷的格子
+                                        if (this.data.board[newRow][newCol] !== -1) {
+                                            hasSafeCell = true;
+                                        }
                                     }
                                 }
                             }
@@ -680,14 +693,17 @@
 
                         // 如果未开格子数量 + 已标记数量 = 数字，则标记所有未开格子
                         if (unrevealedCount + flagCount === number) {
+                            // 不播放音效，只标记格子
                             unrevealedCells.forEach(([r, c]) => {
                                 this.flag(r, c);
                             });
                             return;
                         }
 
-                        // 如果标记数等于格子显示的数字，打开周围未标记的格子
-                        if (flagCount === number) {
+                        // 如果标记数等于数字，打开周围未标记的格子
+                        if (flagCount === number && hasSafeCell) {
+                            let hasRevealedSafe = false;
+                            
                             for (let i = -1; i <= 1; i++) {
                                 for (let j = -1; j <= 1; j++) {
                                     const newRow = row + i;
@@ -700,11 +716,23 @@
                                         !this.data.revealed[newRow][newCol] &&
                                         !this.data.flagged[newRow][newCol]
                                     ) {
-                                        this.reveal(newRow, newCol);
+                                        if (this.data.board[newRow][newCol] !== -1) {
+                                            hasRevealedSafe = true;
+                                        }
+                                        this.data.revealed[newRow][newCol] = true;
+                                        if (this.data.board[newRow][newCol] === 0) {
+                                            this.revealArea(newRow, newCol);
+                                        }
                                     }
                                 }
                             }
+                            
+                            // 只有在实际打开了安全格子时才播放音效
+                            if (hasRevealedSafe) {
+                                playSound('reveal');  // 打开安全区域时播放 reveal 音效
+                            }
                         }
+                        return;
                     }
                     return;
                 }
@@ -716,12 +744,13 @@
                 // 处理第一次点击
                 if (this.data.isFirstClick) {
                     this.data.isFirstClick = false;
-                    this.placeMines(row, col); // 在第一次点击后才放置地雷
+                    this.placeMines(row, col);
                 }
 
                 this.data.revealed[row][col] = true;
 
                 if (this.data.board[row][col] === -1) {
+                    playSound('mine');  // 踩到地雷时播放 mine 音效
                     // 触雷前保存当前状态和触雷位置
                     this.data.lastState = {
                         revealed: JSON.parse(JSON.stringify(this.data.revealed)),
@@ -744,8 +773,12 @@
                     return;
                 }
 
+                // 根据打开的格子类型播放音效
                 if (this.data.board[row][col] === 0) {
+                    playSound('reveal');  // 打开空白区域时播放 reveal 音效
                     this.revealArea(row, col);
+                } else {
+                    playSound('flag');  // 打开安全的数字格子时播放 flag 音效
                 }
 
                 this.checkWin();
@@ -849,12 +882,13 @@
                 if (!this.data.flagged[row][col] && this.data.mineCount > 0) {
                     this.data.flagged[row][col] = true;
                     this.data.mineCount--;
+                    // 移除插旗音效
                 } else if (this.data.flagged[row][col]) {
                     this.data.flagged[row][col] = false;
                     this.data.mineCount++;
+                    // 移除取消插旗音效
                 }
 
-                // 更新显示
                 document.getElementById("remaining-mines").textContent = this.data.mineCount;
             },
 
@@ -873,6 +907,8 @@
             gameOver(isWin) {
                 this.data.gameOver = true;
                 if (!isWin) {
+                    // 只有在踩到地雷时才播放爆炸音效，所以这里不需要播放
+                    
                     // 显示所有地雷
                     for (let i = 0; i < this.config.rows; i++) {
                         for (let j = 0; j < this.config.cols; j++) {
@@ -886,6 +922,7 @@
                         alert("游戏结束！");
                     }, 100);
                 } else {
+                    playSound('win');
                     setTimeout(() => {
                         alert("恭喜你赢了！");
                     }, 100);
@@ -1051,10 +1088,15 @@
             const cell = e.target.closest(".cell");
             if (!cell) return;
 
+            // 确保音频已初始化
+            initSounds();
+
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
 
             MineSweeper.reveal(row, col);
+            // 更新棋盘显示
+            renderBoard();
         }
 
         // 添加全局鼠标抬起事件
@@ -1165,20 +1207,6 @@
             // 重置时更新剩余地雷数显示
             document.getElementById("remaining-mines").textContent = MineSweeper.config.mines;
         }
-
-        // 修改 gameOver 方法来更新界面
-        const originalGameOver = MineSweeper.gameOver;
-        MineSweeper.gameOver = function (isWin) {
-            originalGameOver.call(this, isWin);
-            renderBoard();
-        };
-
-        // 修改 reveal 方法来更新界面
-        const originalReveal = MineSweeper.reveal;
-        MineSweeper.reveal = function (row, col) {
-            originalReveal.call(this, row, col);
-            renderBoard();
-        };
 
         // 修改窗口大小改变事件监听
         window.addEventListener("resize", () => {
@@ -1503,6 +1531,76 @@
             
             updateMineCounter();
         }
+
+        // 替换原有的音频初始化和播放代码
+        const AudioManager = {
+            context: null,
+            buffers: {},
+            sounds: {},
+            
+            init() {
+                // 创建音频上下文
+                this.context = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // 预加载所有音效
+                Object.keys(MineSweeper.config.soundUrls).forEach(key => {
+                    fetch(MineSweeper.config.soundUrls[key])
+                        .then(response => response.arrayBuffer())
+                        .then(arrayBuffer => this.context.decodeAudioData(arrayBuffer))
+                        .then(audioBuffer => {
+                            this.buffers[key] = audioBuffer;
+                        })
+                        .catch(error => console.log('音频加载失败:', error));
+                });
+            },
+            
+            play(soundName) {
+                if (this.buffers[soundName]) {
+                    // 创建音源
+                    const source = this.context.createBufferSource();
+                    source.buffer = this.buffers[soundName];
+                    
+                    // 创建音量控制
+                    const gainNode = this.context.createGain();
+                    gainNode.gain.value = 0.3; // 设置音量
+
+                    // 如果是 flag 音效（空白区域展开音效），缩短其持续时间
+                    if (soundName === 'flag') {
+                        // 设置音频播放时长为原始长度的 30%
+                        source.playbackRate.value = 3.0;
+                        gainNode.gain.value = 0.2; // 降低音量
+                    }
+                    
+                    // 连接节点
+                    source.connect(gainNode);
+                    gainNode.connect(this.context.destination);
+                    
+                    // 立即播放
+                    source.start(0);
+                }
+            }
+        };
+
+        // 修改音频初始化函数
+        function initSounds() {
+            if (!AudioManager.context) {
+                AudioManager.init();
+            }
+        }
+
+        // 修改音频播放函数
+        function playSound(soundName) {
+            if (!AudioManager.context) {
+                initSounds();
+            }
+            AudioManager.play(soundName);
+        }
+
+        // 在用户首次交互时初始化音频系统
+        document.addEventListener('click', function initAudioOnFirstClick() {
+            initSounds();
+            document.removeEventListener('click', initAudioOnFirstClick);
+        }, { once: true });
     </script>
 </body>
 
