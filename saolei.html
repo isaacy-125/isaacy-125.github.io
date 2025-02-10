@@ -781,7 +781,8 @@
                     playSound('flag');  // 打开安全的数字格子时播放 flag 音效
                 }
 
-                this.checkWin();
+                renderBoard();
+                this.checkWin();  // 在渲染后检查胜利
             },
 
             ensureSafeArea(row, col) {
@@ -872,6 +873,7 @@
                         }
                     }
                 }
+                this.checkWin();  // 在展开区域后也检查胜利条件
             },
 
             flag(row, col) {
@@ -882,26 +884,56 @@
                 if (!this.data.flagged[row][col] && this.data.mineCount > 0) {
                     this.data.flagged[row][col] = true;
                     this.data.mineCount--;
-                    // 移除插旗音效
+                    playSound('reveal');
                 } else if (this.data.flagged[row][col]) {
                     this.data.flagged[row][col] = false;
                     this.data.mineCount++;
-                    // 移除取消插旗音效
+                    playSound('reveal');
                 }
 
                 document.getElementById("remaining-mines").textContent = this.data.mineCount;
+                renderBoard();
+                this.checkWin();  // 在渲染后检查胜利
             },
 
             checkWin() {
+                // 如果已经游戏结束，不再检查
+                if (this.data.gameOver) {
+                    return false;
+                }
+
+                let allSafeCellsRevealed = true;
+                let allMinesMarked = true;
+                let mineCount = 0;
+                let markedCount = 0;
+
+                // 遍历所有格子
                 for (let i = 0; i < this.config.rows; i++) {
                     for (let j = 0; j < this.config.cols; j++) {
-                        if (this.data.board[i][j] !== -1 && !this.data.revealed[i][j]) {
-                            return false;
+                        if (this.data.board[i][j] === -1) {
+                            // 是地雷
+                            mineCount++;
+                            if (!this.data.flagged[i][j]) {
+                                allMinesMarked = false;
+                            } else {
+                                markedCount++;
+                            }
+                        } else {
+                            // 不是地雷
+                            if (!this.data.revealed[i][j]) {
+                                allSafeCellsRevealed = false;
+                            }
                         }
                     }
                 }
-                this.gameOver(true);
-                return true;
+
+                // 胜利条件：所有安全格子都被揭示，且所有地雷都被正确标记
+                if (allSafeCellsRevealed && allMinesMarked && mineCount === markedCount) {
+                    this.gameOver(true);
+                    return true;
+                }
+
+                return false;
             },
 
             gameOver(isWin) {
@@ -929,7 +961,7 @@
                 }
             },
 
-            // 添加设置棋盘大小的方法
+            // 修改 setBoardSize 方法
             setBoardSize(mines) {
                 // 根据地雷数量动态计算合适的棋盘大小
                 let size;
@@ -943,8 +975,50 @@
                     size = 22; // 最大棋盘
                 }
 
+                // 确保设置正确的行列数
                 this.config.rows = size;
                 this.config.cols = size;
+                this.config.mines = mines;  // 确保设置正确的地雷数
+            },
+
+            // 修改难度选择的处理代码
+            initDifficultySelector() {
+                const buttons = document.querySelectorAll(".difficulty-btn");
+                const customInput = document.getElementById("customMines");
+                const self = this;  // 保存 MineSweeper 的引用
+
+                buttons.forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        buttons.forEach((b) => b.classList.remove("active"));
+                        btn.classList.add("active");
+
+                        const difficulty = btn.dataset.difficulty;
+                        if (difficulty === "custom") {
+                            const mines = parseInt(customInput.value);
+                            if (mines >= 10 && mines <= 80) {
+                                self.setBoardSize(mines);  // 使用保存的引用
+                                self.config.mines = mines;  // 使用保存的引用
+                            } else {
+                                alert("请输入10-80之间的数字");
+                                return;
+                            }
+                        } else {
+                            const config = self.config.difficulties[difficulty];
+                            self.config.mines = config.mines;
+                            self.config.rows = config.rows || config.size;
+                            self.config.cols = config.cols || config.size;
+                        }
+
+                        resetGame();
+                    });
+                });
+
+                // 自定义输入框的处理
+                customInput.addEventListener("change", () => {
+                    const mines = parseInt(customInput.value);
+                    if (mines < 10) customInput.value = 10;
+                    if (mines > 80) customInput.value = 80;
+                });
             },
 
             // 添加重试方法
@@ -1245,48 +1319,8 @@
             }, 300); // 300ms 延迟，避免频繁触发
         });
 
-        // 添加难度选择的事件处理
-        function initDifficultySelector() {
-            const buttons = document.querySelectorAll(".difficulty-btn");
-            const customInput = document.getElementById("customMines");
-
-            buttons.forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    // 移除其他按钮的active类
-                    buttons.forEach((b) => b.classList.remove("active"));
-                    btn.classList.add("active");
-
-                    const difficulty = btn.dataset.difficulty;
-                    if (difficulty === "custom") {
-                        const mines = parseInt(customInput.value);
-                        if (mines >= 10 && mines <= 80) {
-                            MineSweeper.config.mines = mines;
-                            MineSweeper.setBoardSize(mines); // 设置棋盘大小
-                        } else {
-                            alert("请输入10-80之间的数字");
-                            return;
-                        }
-                    } else {
-                        const config = MineSweeper.config.difficulties[difficulty];
-                        MineSweeper.config.mines = config.mines;
-                        MineSweeper.config.rows = config.size;
-                        MineSweeper.config.cols = config.size;
-                    }
-
-                    resetGame();
-                });
-            });
-
-            // 自定义输入框的处理
-            customInput.addEventListener("change", () => {
-                const mines = parseInt(customInput.value);
-                if (mines < 10) customInput.value = 10;
-                if (mines > 80) customInput.value = 80;
-            });
-        }
-
         // 在初始化时调用
-        initDifficultySelector();
+        MineSweeper.initDifficultySelector();
 
         // 初始化游戏
         resetGame();
@@ -1355,7 +1389,7 @@
             settingsContent.innerHTML = originalSelector.innerHTML;
 
             // 重新初始化难度选择器的事件监听
-            initDifficultySelector();
+            MineSweeper.initDifficultySelector();
 
             // 打开设置
             settingsBtn.addEventListener("click", () => {
